@@ -3,8 +3,10 @@ package dev.gaphunter.apisecuritycompanion.annotator
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralExpression
+import com.intellij.psi.PsiLiteralValue
 import com.intellij.psi.PsiLocalVariable
 import com.intellij.psi.PsiField
 import com.intellij.psi.PsiAssignmentExpression
@@ -32,9 +34,9 @@ class SecretAndTransportAnnotator : Annotator {
         if (!secretsOn && !httpOn) return
 
         val (value, variableHint) = when (element) {
-            is PsiLiteralExpression -> {
+            is PsiLiteralValue -> {
                 val v = element.value as? String ?: return
-                v to javaVariableNameHint(element)
+                v to (element as? PsiLiteralExpression)?.let { javaVariableNameHint(it) }
             }
             is KtStringTemplateExpression -> {
                 if (element.hasInterpolation()) return
@@ -44,10 +46,12 @@ class SecretAndTransportAnnotator : Annotator {
             else -> return
         }
 
+        val range: TextRange = element.getTextRange()
+
         if (secretsOn) {
             SecretDetector.scanLiteral(value, variableHint)?.let { finding ->
                 holder.newAnnotation(HighlightSeverity.WARNING, "Potential secret: ${finding.description}")
-                    .range(element.textRange)
+                    .range(range)
                     .create()
                 return
             }
@@ -55,7 +59,7 @@ class SecretAndTransportAnnotator : Annotator {
         if (httpOn) {
             InsecureTransportDetector.scanUrlLiteral(value)?.let { finding ->
                 holder.newAnnotation(HighlightSeverity.WARNING, finding.description)
-                    .range(element.textRange)
+                    .range(range)
                     .create()
             }
         }
