@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.1.1]
+
+### Fixed
+
+- `AnnotationBuilder.range(element.textRange)` resolved against an
+  `@ApiStatus.Experimental`-marked `PsiElement` subtype via Kotlin
+  overload resolution, without the code ever referencing that type
+  directly. Fixed by typing the range explicitly as `TextRange` before
+  the `.range()` call, forcing the stable overload — `verifyPlugin` now
+  reports zero experimental-API warnings across all 6 target IDEs.
+
 ## [0.1.0]
 
 ### Added
@@ -28,5 +39,6 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.1...HEAD
+[0.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/api-security-companion/commits/0.1.0
