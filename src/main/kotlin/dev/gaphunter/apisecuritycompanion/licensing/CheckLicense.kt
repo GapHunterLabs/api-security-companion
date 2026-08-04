@@ -33,19 +33,17 @@ import java.util.Base64
  * do not modify it when adapting this file, only PRODUCT_CODE is
  * project-specific.
  *
- * PRODUCT_CODE below is a **placeholder**, format-valid (max 15 chars,
- * starts with 'P', all uppercase, no digits/symbols) but **not an
- * assigned code** -- API Security Companion has not been enrolled in
- * Marketplace Monetization yet (see CONSTITUTION.md SS4.1 Fase 2: "no
- * aplicar a Freemium hasta que el código Pro exista de verdad"). Do not
- * guess a real value; replace this with the real assigned code only at
- * the moment of actually applying to Freemium in the Marketplace UI,
- * updating `<product-descriptor code="...">` in plugin.xml to match if
- * one is added at that point.
+ * PRODUCT_CODE below is the **real code assigned by JetBrains**
+ * (`[REDACTED-PRODUCT-CODE]`) -- API Security Companion's Freemium monetization
+ * request was submitted 2026-08-04 via the Marketplace Monetization
+ * tab, pending review by JetBrains's support team (per their own UI,
+ * you don't need to wait for their reply to proceed with next steps).
+ * No `<product-descriptor>` tag was added to plugin.xml for this,
+ * matching `ansible-companion`'s own real-code port, which also ships
+ * without one.
  */
 object CheckLicense {
-    /** Must be the same value as plugin.xml's `<product-descriptor code="...">` tag, if one is added. */
-    private const val PRODUCT_CODE = "PAPISECURITY"
+    private const val PRODUCT_CODE = "[REDACTED-PRODUCT-CODE]"
 
     private const val KEY_PREFIX = "key:"
     private const val STAMP_PREFIX = "stamp:"
