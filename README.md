@@ -65,6 +65,11 @@ works, never freezes the IDE, and never phones home."
   approach that made the OpenAPI Specifications plugin slow in the first
   place.
 
+## Enterprise / Team Licensing
+
+Need enterprise features, custom security rules, or team licensing?
+Contact us at **kennyj.diazm@gmail.com**.
+
 ## Development
 
 ```
