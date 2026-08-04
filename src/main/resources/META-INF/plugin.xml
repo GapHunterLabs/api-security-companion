@@ -15,6 +15,12 @@
         crashes during scans, broken suppression/ignore controls, and an "Ultimate Plus" paywall
         undocumented until checkout. Every rule here can be turned off individually, and none of
         them are held back behind a paid tier.</p>
+        <p>API Security Companion Pro (optional paid tier): Kotlin support for Excessive Data
+        Exposure/Mass Assignment (the free tier's checks are Java-only), two more OWASP API
+        Security Top 10 checks — Broken Object Level Authorization and Unrestricted Resource
+        Consumption — and team rules shared via a <code>.gaphunter-security-rules</code> file
+        committed to your repo, so a rule the team agreed on can't be silently disabled by one
+        person's local settings.</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -33,6 +39,8 @@
         <annotator language="kotlin" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.TrustManagerAnnotator"/>
         <annotator language="JAVA" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.EntityExposureAnnotator"/>
         <annotator language="yaml" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.OpenApiSpecAnnotator"/>
+        <annotator language="JAVA" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ProSecurityAnnotator"/>
+        <annotator language="kotlin" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ProSecurityAnnotator"/>
 
         <applicationService serviceImplementation="dev.gaphunter.apisecuritycompanion.settings.SecuritySettings"/>
         <applicationConfigurable

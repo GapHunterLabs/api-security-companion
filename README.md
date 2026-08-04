@@ -35,8 +35,8 @@ works, never freezes the IDE, and never phones home."
 - **TLS trust managers that accept every certificate** (CWE-295) —
   the classic empty `checkServerTrusted`/`checkClientTrusted`.
 - **Excessive Data Exposure / Mass Assignment** (OWASP API Security Top
-  10, Java only in this release): REST endpoints that return a
-  persistence entity directly, or bind a request body straight onto one.
+  10, Java and Kotlin): REST endpoints that return a persistence entity
+  directly, or bind a request body straight onto one.
 - **OpenAPI spec checks**: an empty top-level `security:` scheme, and
   wildcard CORS (`Access-Control-Allow-Origin: *`) combined with
   `Access-Control-Allow-Credentials: true`.
@@ -64,6 +64,27 @@ works, never freezes the IDE, and never phones home."
   value," and a full spec parser is exactly the kind of heavyweight
   approach that made the OpenAPI Specifications plugin slow in the first
   place.
+
+## API Security Companion Pro
+
+Optional paid tier on top of everything above (all free-tier checks stay
+free, no exceptions):
+
+- **Kotlin support for Excessive Data Exposure / Mass Assignment** — the
+  free tier's checks are Java-only; Pro resolves Kotlin type references
+  (including a Kotlin function referencing a Java-declared entity class)
+  to catch the same two OWASP checks in Kotlin code.
+- **Broken Object Level Authorization** (OWASP API1): flags a REST
+  endpoint with an object-ID-shaped parameter (`id`, `orderId`, `user_id`)
+  and no visible authorization/ownership check in its body. A heuristic
+  — always framed as "potential," worth a manual look, not a certainty.
+- **Unrestricted Resource Consumption** (OWASP API4): flags a page-size/
+  limit-shaped parameter with no upper-bound validation annotation.
+- **Team rules shared via VCS**: commit a `.gaphunter-security-rules`
+  file (one rule ID per line, `#` for comments) to your project root,
+  and every rule listed there is enforced for every team member who
+  opens the project — a rule the team agreed on can't be silently
+  disabled by one person's local Settings.
 
 ## Enterprise / Team Licensing
 

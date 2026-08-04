@@ -4,6 +4,32 @@
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Added
+
+- **API Security Companion Pro** (optional paid tier, gated behind
+  `LicensingFacade`):
+  - Kotlin support for Excessive Data Exposure / Mass Assignment — the
+    two OWASP checks from 0.1.0 were Java-only; type-annotation
+    resolution now works for Kotlin functions/parameters too, including
+    a Kotlin function referencing a Java-declared entity class.
+  - Broken Object Level Authorization (OWASP API1): flags a REST
+    endpoint with an object-ID-shaped parameter and no visible
+    authorization/ownership check in its body. A heuristic, always
+    framed as "potential" — not a data-flow analysis.
+  - Unrestricted Resource Consumption (OWASP API4): flags a page-size/
+    limit-shaped parameter with no upper-bound validation annotation.
+  - Team rules shared via VCS: a `.gaphunter-security-rules` file
+    (one rule ID per line) committed to the project root forces those
+    rules on for every team member who opens the project, regardless of
+    their own local Settings — a rule the team agreed on can't be
+    silently disabled by one person.
+- All Pro checks are registered unconditionally (the plugin loads
+  identically for everyone); only the paid feature itself gates on
+  license or the team policy file, per this workspace's own established
+  Freemium pattern.
+
 ## [0.1.1]
 
 ### Fixed
@@ -34,11 +60,12 @@
 - Every rule can be disabled individually in Settings — none of them are
   held back behind a paid tier.
 
-### Known gaps (tracked for a future release)
+### Known gaps (resolved in 0.2.0)
 
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/api-security-companion/commits/0.1.0
