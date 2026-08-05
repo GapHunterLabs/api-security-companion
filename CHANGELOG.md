@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+## [2026.1.0]
+
+### Changed
+
+- **Version scheme**: this plugin now versions as `YYYY.MINOR.PATCH`
+  (JetBrains's own convention for Paid/Freemium plugins) instead of
+  semver (`0.2.x`) -- required by the same hard Marketplace validation
+  rule already hit with `ansible-companion` and `openapi-companion`:
+  `<product-descriptor>`'s `release-version` must share its leading
+  digits with the plugin's own version.
+
+### Added
+
+- `<product-descriptor>` in `plugin.xml`, with the real product code
+  JetBrains Marketplace assigned on applying for the Freemium pricing
+  model: `code="[REDACTED-PRODUCT-CODE]"`, `optional="true"` -- the free tier
+  stays fully functional with no license, only Pro features gate.
+
 ## [0.2.0]
 
 ### Added
@@ -65,7 +83,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.0...HEAD
+[2026.1.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.2.0...2026.1.0
 [0.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/api-security-companion/commits/0.1.0
