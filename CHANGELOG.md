@@ -19,8 +19,8 @@
 
 - `<product-descriptor>` in `plugin.xml`, with the real product code
   JetBrains Marketplace assigned on applying for the Freemium pricing
-  model: `code="[REDACTED-PRODUCT-CODE]"`, `optional="true"` -- the free tier
-  stays fully functional with no license, only Pro features gate.
+  model -- `optional="true"` is what keeps the free tier fully
+  functional with no license, only Pro features gate.
 
 ## [0.2.0]
 
