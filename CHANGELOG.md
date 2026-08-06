@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [2026.1.1]
+
+### Fixed
+
+- Removed internal Marketplace/monetization-planning details that had
+  been mistakenly documented in public files -- no user-facing change.
+
 ## [2026.1.0]
 
 ### Changed
@@ -83,7 +90,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.1...HEAD
+[2026.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.0...2026.1.1
 [2026.1.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.2.0...2026.1.0
 [0.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.0...0.1.1
