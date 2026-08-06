@@ -43,7 +43,7 @@ import java.util.Base64
  * without one.
  */
 object CheckLicense {
-    private const val PRODUCT_CODE = "[REDACTED-PRODUCT-CODE]"
+    private const val PRODUCT_CODE = "PAPISECURITYCOM"
 
     private const val KEY_PREFIX = "key:"
     private const val STAMP_PREFIX = "stamp:"
