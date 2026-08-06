@@ -37,7 +37,7 @@
          digits with the plugin's own version, same forcing function already
          hit with ansible-companion and openapi-companion, so this build
          moves from 0.2.0 to the AAAA.N.N scheme. -->
-    <product-descriptor code="PAPISECURITYCOM" release-date="20260806" release-version="20261" optional="true"/>
+    <product-descriptor code="PAPISECURITYCOM" release-date="20260805" release-version="20261" optional="true"/>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
         <supportsKotlinPluginMode supportsK2="true"/>
