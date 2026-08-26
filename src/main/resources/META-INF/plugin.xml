@@ -59,5 +59,6 @@
             instance="dev.gaphunter.apisecuritycompanion.settings.SecuritySettingsConfigurable"
             id="dev.gaphunter.apisecuritycompanion.settings.SecuritySettingsConfigurable"
             displayName="API Security Companion"/>
+        <notificationGroup id="API Security Companion" displayType="BALLOON"/>
     </extensions>
 </idea-plugin>

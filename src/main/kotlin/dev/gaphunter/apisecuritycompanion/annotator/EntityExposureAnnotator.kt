@@ -7,6 +7,7 @@ import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import dev.gaphunter.apisecuritycompanion.detect.ExcessiveExposureDetector
+import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
 import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 
@@ -36,6 +37,14 @@ class EntityExposureAnnotator : Annotator {
                     HighlightSeverity.WARNING,
                     "This endpoint returns a persistence entity directly — every field on it, including ones never meant to be public, gets serialized to every caller",
                 ).range(element.nameIdentifier?.textRange ?: element.textRange).create()
+
+                val file = element.containingFile
+                val anchor = element.nameIdentifier ?: element
+                val path = file.virtualFile?.path
+                if (path != null) {
+                    val lineNumber = file.viewProvider.document?.getLineNumber(anchor.textRange.startOffset) ?: -1
+                    ReviewPrompt.recordHit(file.project, "$path:$lineNumber:exposure")
+                }
             }
         }
 
@@ -48,6 +57,13 @@ class EntityExposureAnnotator : Annotator {
                         HighlightSeverity.WARNING,
                         "This write endpoint binds the request body directly onto a persistence entity — a client can set any column, including ones like 'isAdmin' that were never meant to be client-writable",
                     ).range(parameter.textRange).create()
+
+                    val file = parameter.containingFile
+                    val path = file.virtualFile?.path
+                    if (path != null) {
+                        val lineNumber = file.viewProvider.document?.getLineNumber(parameter.textRange.startOffset) ?: -1
+                        ReviewPrompt.recordHit(file.project, "$path:$lineNumber:mass-assignment")
+                    }
                 }
             }
         }

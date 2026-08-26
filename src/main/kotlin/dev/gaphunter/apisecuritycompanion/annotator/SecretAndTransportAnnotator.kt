@@ -13,6 +13,7 @@ import com.intellij.psi.PsiAssignmentExpression
 import com.intellij.psi.PsiReferenceExpression
 import dev.gaphunter.apisecuritycompanion.detect.InsecureTransportDetector
 import dev.gaphunter.apisecuritycompanion.detect.SecretDetector
+import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
 import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 import org.jetbrains.kotlin.psi.KtProperty
@@ -53,6 +54,7 @@ class SecretAndTransportAnnotator : Annotator {
                 holder.newAnnotation(HighlightSeverity.WARNING, "Potential secret: ${finding.description}")
                     .range(range)
                     .create()
+                recordHitFor(element, "secret")
                 return
             }
         }
@@ -61,8 +63,16 @@ class SecretAndTransportAnnotator : Annotator {
                 holder.newAnnotation(HighlightSeverity.WARNING, finding.description)
                     .range(range)
                     .create()
+                recordHitFor(element, "insecure-http")
             }
         }
+    }
+
+    private fun recordHitFor(element: PsiElement, kind: String) {
+        val file = element.containingFile
+        val path = file.virtualFile?.path ?: return
+        val lineNumber = file.viewProvider.document?.getLineNumber(element.textRange.startOffset) ?: -1
+        ReviewPrompt.recordHit(file.project, "$path:$lineNumber:$kind")
     }
 
     private fun javaVariableNameHint(literal: PsiLiteralExpression): String? {

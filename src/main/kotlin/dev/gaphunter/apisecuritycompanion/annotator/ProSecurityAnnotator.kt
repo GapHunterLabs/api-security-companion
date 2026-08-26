@@ -12,6 +12,7 @@ import dev.gaphunter.apisecuritycompanion.detect.KotlinTypeAnnotationResolver
 import dev.gaphunter.apisecuritycompanion.detect.ResourceConsumptionDetector
 import dev.gaphunter.apisecuritycompanion.detect.RestEndpointAnnotations
 import dev.gaphunter.apisecuritycompanion.licensing.CheckLicense
+import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
 import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 import dev.gaphunter.apisecuritycompanion.settings.TeamPolicyLoader
@@ -49,6 +50,13 @@ class ProSecurityAnnotator : Annotator {
         return licensed || teamForced
     }
 
+    private fun recordHitFor(element: PsiElement, kind: String) {
+        val file = element.containingFile
+        val path = file.virtualFile?.path ?: return
+        val lineNumber = file.viewProvider.document?.getLineNumber(element.textRange.startOffset) ?: -1
+        ReviewPrompt.recordHit(file.project, "$path:$lineNumber:$kind")
+    }
+
     // ---------- Java ----------
 
     private fun annotateJavaMethod(method: PsiMethod, holder: AnnotationHolder) {
@@ -64,6 +72,7 @@ class ProSecurityAnnotator : Annotator {
                     "Potential Broken Object Level Authorization (OWASP API1): this endpoint takes an " +
                         "object ID but no authorization/ownership check is visible in its body -- worth a manual review",
                 ).range(method.nameIdentifier?.textRange ?: method.textRange).create()
+                recordHitFor(method.nameIdentifier ?: method, "bola")
             }
         }
 
@@ -76,6 +85,7 @@ class ProSecurityAnnotator : Annotator {
                         "Potential Unrestricted Resource Consumption (OWASP API4): '${parameter.name}' looks like a " +
                             "page-size/limit parameter with no upper-bound validation -- a client can request an unbounded amount of data",
                     ).range(parameter.textRange).create()
+                    recordHitFor(parameter, "resource-consumption")
                 }
             }
         }
@@ -100,6 +110,7 @@ class ProSecurityAnnotator : Annotator {
                     "This endpoint returns a persistence entity directly -- every field on it, including " +
                         "ones never meant to be public, gets serialized to every caller",
                 ).range(function.nameIdentifier?.textRange ?: function.textRange).create()
+                recordHitFor(function.nameIdentifier ?: function, "exposure")
             }
         }
 
@@ -112,6 +123,7 @@ class ProSecurityAnnotator : Annotator {
                         "This write endpoint binds the request body directly onto a persistence entity -- a " +
                             "client can set any column, including ones like 'isAdmin' that were never meant to be client-writable",
                     ).range(parameter.textRange).create()
+                    recordHitFor(parameter, "mass-assignment")
                 }
             }
         }
@@ -124,6 +136,7 @@ class ProSecurityAnnotator : Annotator {
                     "Potential Broken Object Level Authorization (OWASP API1): this endpoint takes an " +
                         "object ID but no authorization/ownership check is visible in its body -- worth a manual review",
                 ).range(function.nameIdentifier?.textRange ?: function.textRange).create()
+                recordHitFor(function.nameIdentifier ?: function, "bola")
             }
         }
 
@@ -137,6 +150,7 @@ class ProSecurityAnnotator : Annotator {
                         "Potential Unrestricted Resource Consumption (OWASP API4): '$name' looks like a " +
                             "page-size/limit parameter with no upper-bound validation -- a client can request an unbounded amount of data",
                     ).range(parameter.textRange).create()
+                    recordHitFor(parameter, "resource-consumption")
                 }
             }
         }

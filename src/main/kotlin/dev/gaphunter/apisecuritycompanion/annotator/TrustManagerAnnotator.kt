@@ -6,6 +6,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import dev.gaphunter.apisecuritycompanion.detect.InsecureTransportDetector
+import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
 import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 import org.jetbrains.kotlin.psi.KtClass
@@ -37,6 +38,13 @@ class TrustManagerAnnotator : Annotator {
             holder.newAnnotation(HighlightSeverity.WARNING, finding.description)
                 .range(nameElement.textRange)
                 .create()
+
+            val file = element.containingFile
+            val path = file.virtualFile?.path
+            if (path != null) {
+                val lineNumber = file.viewProvider.document?.getLineNumber(nameElement.textRange.startOffset) ?: -1
+                ReviewPrompt.recordHit(file.project, "$path:$lineNumber")
+            }
         }
     }
 }
