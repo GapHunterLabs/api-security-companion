@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [2026.1.2]
+
+### Added
+
+- Review/star CTA: after 10 distinct real findings across any of the
+  6 detectors (excessive data exposure, mass assignment, hardcoded
+  secrets, insecure transport, trust-all TLS, OpenAPI spec issues, and
+  the Pro-tier BOLA/resource-consumption/Kotlin checks), a one-time
+  notification asks whether to rate the plugin on Marketplace, with a
+  permanent "Don't ask again" option. Standard mechanism used
+  catalog-wide since 2026-08-24 (`CONSTITUTION.md` §7.2), rolled out
+  to this plugin now.
+
 ## [2026.1.1]
 
 ### Fixed
@@ -90,7 +103,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.1...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.2...HEAD
+[2026.1.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.1...2026.1.2
 [2026.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.0...2026.1.1
 [2026.1.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.2.0...2026.1.0
 [0.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.1.1...0.2.0

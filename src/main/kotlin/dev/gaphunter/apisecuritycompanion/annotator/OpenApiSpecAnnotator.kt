@@ -6,6 +6,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import dev.gaphunter.apisecuritycompanion.detect.OpenApiSpecDetector
+import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
 import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 
@@ -52,5 +53,8 @@ class OpenApiSpecAnnotator : Annotator {
         val lineLength = lines.getOrNull(lineNumber - 1)?.length ?: 0
         val range = com.intellij.openapi.util.TextRange(offset, (offset + lineLength).coerceAtMost(text.length))
         holder.newAnnotation(HighlightSeverity.WARNING, message).range(range).create()
+
+        val path = file.virtualFile?.path ?: return
+        ReviewPrompt.recordHit(file.project, "$path:$lineNumber")
     }
 }
