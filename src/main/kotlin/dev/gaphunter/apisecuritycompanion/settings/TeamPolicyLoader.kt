@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * Reads via `VirtualFile.contentsToByteArray()`, not a
  * `FileTypeOverrider`/`FileTypeDetector` context, so the real infinite-
- * recursion risk documented in SDK_GOTCHAS.md SS11 doesn't apply here.
+ * recursion risk that pattern is prone to doesn't apply here.
  */
 object TeamPolicyLoader {
     const val POLICY_FILE_NAME = ".gaphunter-security-rules"

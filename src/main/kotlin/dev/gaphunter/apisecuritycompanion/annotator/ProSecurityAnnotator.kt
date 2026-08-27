@@ -25,8 +25,8 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
  * Resource Consumption (OWASP API4) -- for both Java and Kotlin.
  *
  * Registered unconditionally, same as every other annotator in this
- * plugin (SDK_GOTCHAS.md SS8: the plugin loads identically for everyone,
- * only the specific paid feature gates on license) -- a rule only
+ * plugin (the plugin loads identically for everyone, only the specific
+ * paid feature gates on license) -- a rule only
  * produces annotations when [isRuleActive] is true, i.e. the user has a
  * valid license OR the project's `.gaphunter-security-rules` team
  * policy file forces that specific rule regardless of individual
