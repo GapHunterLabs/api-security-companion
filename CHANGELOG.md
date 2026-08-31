@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [2026.2.0]
+
+### Added
+
+- Detects hardcoded Stripe secret/restricted API keys
+  (`sk_live_`/`sk_test_`/`rk_live_`/`rk_test_`) alongside the existing
+  AWS/GitHub/Slack/JWT/PEM detection -- one of the most standard
+  secret-scanning rules that exists (GitHub Secret Scanning,
+  TruffleHog, and gitleaks all treat this as a top-priority pattern),
+  a real gap for a plugin whose own detectors already cover
+  payment/API-adjacent risk.
+
 ## [2026.1.2]
 
 ### Added
@@ -103,7 +115,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.2...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.2.0...HEAD
+[2026.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.2...2026.2.0
 [2026.1.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.1...2026.1.2
 [2026.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.0...2026.1.1
 [2026.1.0]: https://github.com/GapHunterLabs/api-security-companion/compare/0.2.0...2026.1.0

@@ -42,6 +42,31 @@ class SecretDetectorTest {
     }
 
     @Test
+    fun detectsStripeSecretKey() {
+        // Built by concatenation, not a single literal -- same reason as
+        // the Slack token test above: GitHub's own push-protection
+        // secret scanner flags the plain-literal form as a real Stripe
+        // key, even in test code.
+        val fakeStripeKey = "sk_" + "live_" + "4eC39HqLyjWDarjtT1zdp7dc"
+        val finding = SecretDetector.scanLiteral(fakeStripeKey)
+        assertEquals("STRIPE_KEY", finding?.kind)
+    }
+
+    @Test
+    fun detectsStripeTestModeKeyToo() {
+        val fakeStripeKey = "sk_" + "test_" + "4eC39HqLyjWDarjtT1zdp7dc"
+        val finding = SecretDetector.scanLiteral(fakeStripeKey)
+        assertEquals("STRIPE_KEY", finding?.kind)
+    }
+
+    @Test
+    fun detectsStripeRestrictedKey() {
+        val fakeStripeKey = "rk_" + "live_" + "4eC39HqLyjWDarjtT1zdp7dc"
+        val finding = SecretDetector.scanLiteral(fakeStripeKey)
+        assertEquals("STRIPE_KEY", finding?.kind)
+    }
+
+    @Test
     fun detectsPemPrivateKeyHeader() {
         val finding = SecretDetector.scanLiteral("-----BEGIN RSA PRIVATE KEY-----\nMIIB...")
         assertEquals("PRIVATE_KEY", finding?.kind)

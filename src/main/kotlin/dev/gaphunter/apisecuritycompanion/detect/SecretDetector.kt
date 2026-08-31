@@ -18,6 +18,15 @@ object SecretDetector {
     private val JWT = Regex("""\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\b""")
     private val PRIVATE_KEY_HEADER = Regex("""-----BEGIN ((RSA|EC|OPENSSH|DSA|ENCRYPTED) )?PRIVATE KEY-----""")
 
+    // Stripe secret/restricted API keys -- sk_live_.../rk_live_...
+    // (sk_test_/rk_test_ too, since a hardcoded test key still leaks
+    // real account structure and is a real finding worth flagging).
+    // One of the most standard secret-scanning rules that exists
+    // (GitHub Secret Scanning, TruffleHog, gitleaks all treat this as a
+    // top-priority pattern) -- a real, high-value gap for a plugin
+    // whose own detectors already cover payment/API-adjacent risk.
+    private val STRIPE_KEY = Regex("""\b[sr]k_(live|test)_[A-Za-z0-9]{20,}\b""")
+
     private val SECRET_LIKE_NAME = Regex(
         """(api[_-]?key|secret|token|password|passwd|pwd|access[_-]?key|private[_-]?key)""",
         RegexOption.IGNORE_CASE,
@@ -46,6 +55,9 @@ object SecretDetector {
         }
         if (PRIVATE_KEY_HEADER.containsMatchIn(value)) {
             return SecretFinding("PRIVATE_KEY", "Contains a PEM private key block")
+        }
+        STRIPE_KEY.find(value)?.let {
+            return SecretFinding("STRIPE_KEY", "Looks like a Stripe secret/restricted API key (${it.value.take(11)}...)")
         }
         if (variableNameHint != null && SECRET_LIKE_NAME.containsMatchIn(variableNameHint) && looksLikeARealSecret(value)) {
             return SecretFinding(
