@@ -27,10 +27,11 @@ works, never freezes the IDE, and never phones home."
 
 ## What it checks
 
-- **Hardcoded secrets**: AWS access keys, GitHub/Slack tokens, JWTs, PEM
-  private key blocks, plus a variable-name + Shannon-entropy heuristic
-  for the generic case (`val apiSecret = "..."` with a high-entropy
-  value that isn't an obvious placeholder).
+- **Hardcoded secrets**: AWS access keys, GitHub/Slack tokens, Stripe
+  secret/restricted keys, JWTs, PEM private key blocks, plus a
+  variable-name + Shannon-entropy heuristic for the generic case
+  (`val apiSecret = "..."` with a high-entropy value that isn't an
+  obvious placeholder).
 - **Plaintext HTTP** to non-local hosts.
 - **TLS trust managers that accept every certificate** (CWE-295) —
   the classic empty `checkServerTrusted`/`checkClientTrusted`.
