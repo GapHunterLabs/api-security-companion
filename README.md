@@ -86,6 +86,15 @@ free, no exceptions):
   and every rule listed there is enforced for every team member who
   opens the project — a rule the team agreed on can't be silently
   disabled by one person's local Settings.
+- **ML false-positive reduction on generic secret matches** (off by
+  default, even with a license — enable it from Settings): a small
+  model (under 20KB, no network calls, no telemetry) re-checks the
+  generic, entropy-based secret match before it's shown, to cut down
+  on warnings for UUIDs, hashes, and other high-entropy-but-not-secret
+  values. It never touches a recognized format like an AWS key or a
+  JWT — those are already exact matches. Tuned deliberately
+  conservative: it only suppresses a warning when confident, because
+  missing a real secret is a far worse outcome than one extra warning.
 
 ## Enterprise / Team Licensing
 

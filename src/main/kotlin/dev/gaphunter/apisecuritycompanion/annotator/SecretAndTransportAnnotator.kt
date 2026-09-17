@@ -13,6 +13,8 @@ import com.intellij.psi.PsiAssignmentExpression
 import com.intellij.psi.PsiReferenceExpression
 import dev.gaphunter.apisecuritycompanion.detect.InsecureTransportDetector
 import dev.gaphunter.apisecuritycompanion.detect.SecretDetector
+import dev.gaphunter.apisecuritycompanion.detect.ml.MlClassifierService
+import dev.gaphunter.apisecuritycompanion.licensing.CheckLicense
 import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
 import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
@@ -51,6 +53,9 @@ class SecretAndTransportAnnotator : Annotator {
 
         if (secretsOn) {
             SecretDetector.scanLiteral(value, variableHint)?.let { finding ->
+                if (finding.kind == "GENERIC_HIGH_ENTROPY" && isMlFalsePositiveReductionActive()) {
+                    if (MlClassifierService.getInstance().isConfidentFalsePositive(value)) return@let
+                }
                 holder.newAnnotation(HighlightSeverity.WARNING, "Potential secret: ${finding.description}")
                     .range(range)
                     .create()
@@ -66,6 +71,26 @@ class SecretAndTransportAnnotator : Annotator {
                 recordHitFor(element, "insecure-http")
             }
         }
+    }
+
+    /**
+     * Pro-gated, and off by default even with a license (see
+     * [SecurityRule.ML_FALSE_POSITIVE_REDUCTION] for why this one rule
+     * doesn't follow the rest of the file's Free/no-license pattern).
+     * Every other check in this class stays exactly as before --
+     * secret-by-signature detection and insecure-HTTP detection are
+     * still fully Free, ungated, unaffected by licensing either way.
+     *
+     * Deliberately does NOT consult [dev.gaphunter.apisecuritycompanion.settings.TeamPolicyLoader]
+     * the way other Pro rules can be team-forced on -- that mechanism
+     * exists to force an org-agreed rule ON for every team member, but
+     * this rule SUPPRESSES warnings, so silently force-enabling it via a
+     * committed policy file would be the opposite of the "opt in after
+     * you understand what this does" design goal.
+     */
+    private fun isMlFalsePositiveReductionActive(): Boolean {
+        if (!SecuritySettings.getInstance().isEnabled(SecurityRule.ML_FALSE_POSITIVE_REDUCTION)) return false
+        return CheckLicense.isLicensed() == true
     }
 
     private fun recordHitFor(element: PsiElement, kind: String) {

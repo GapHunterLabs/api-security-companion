@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [2026.3.0]
+
+### Added
+
+- **ML false-positive reduction** on the generic, entropy-based secret
+  match (Pro, off by default even with a license — enable it from
+  Settings): a small model (under 20KB) re-checks that specific case
+  before showing a warning, to cut down on false alarms for UUIDs,
+  hashes, and similar high-entropy-but-not-secret values. Runs 100%
+  on-device, no network calls. Never applies to a recognized format
+  (AWS key, GitHub/Slack token, JWT, PEM block, Stripe key) — those
+  stay exact matches, unaffected. Tuned deliberately conservative: it
+  only suppresses a warning when confident, since missing a real
+  secret is a far worse outcome than one extra warning shown — that's
+  also why it ships off by default instead of following every other
+  rule's "on unless you turn it off" pattern.
+
 ## [2026.2.0]
 
 ### Added
@@ -115,7 +132,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.2.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.3.0...HEAD
+[2026.3.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.2.0...2026.3.0
 [2026.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.2...2026.2.0
 [2026.1.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.1...2026.1.2
 [2026.1.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.0...2026.1.1
