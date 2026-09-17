@@ -10,6 +10,36 @@ plugins {
 dependencies {
     testImplementation("junit:junit:4.13.2")
 
+    // Powers the Pro-tier "reduce false positives on generic high-entropy
+    // secret matches" rule (SecurityRule.ML_FALSE_POSITIVE_REDUCTION) --
+    // runs the bundled secret_classifier.onnx (20KB, see
+    // ml-training/README.md) 100% on-device. KInference (JetBrains-
+    // Research), not com.microsoft.onnxruntime: the official native
+    // ONNX Runtime Java binding crashes the JVM
+    // (EXCEPTION_ACCESS_VIOLATION in msvcp140.dll) the moment it
+    // initializes inside a process hosted by the JetBrains Runtime --
+    // confirmed via a real crash log, not a hypothetical -- because JBR
+    // already loads its own, incompatible copy of that DLL. KInference's
+    // inference-core-jvm is pure JVM bytecode (verified: no .dll/.so in
+    // the jar), so there is no native library to collide with JBR's in
+    // the first place.
+    //
+    // Excludes KInference's own kotlinx-coroutines-core (pulls 1.9.0):
+    // that jar landing on testRuntimeClasspath (confirmed via
+    // `./gradlew dependencies`) lines up exactly with a real
+    // BasePlatformTestCase test failure that appeared the same build
+    // this dependency was added --
+    // `NoSuchMethodError: ...IntellijCoroutines.runBlockingWithParallelismCompensation`
+    // (that JetBrains-internal method isn't in the plain 1.9.0 release
+    // from Maven Central). Excluding it here so the platform's own
+    // bundled coroutines runtime is what's actually on the classpath at
+    // test/runtime time -- nothing in this file needs KInference's own
+    // copy specifically, only plain `runBlocking` is used.
+    implementation("io.kinference:inference-core-jvm:0.2.27") {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core-jvm")
+    }
+
     intellijPlatform {
         intellijIdea("2025.2.6.2")
 

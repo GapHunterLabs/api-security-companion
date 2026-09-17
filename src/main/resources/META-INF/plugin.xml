@@ -18,9 +18,13 @@
         <p>API Security Companion Pro (optional paid tier): Kotlin support for Excessive Data
         Exposure/Mass Assignment (the free tier's checks are Java-only), two more OWASP API
         Security Top 10 checks — Broken Object Level Authorization and Unrestricted Resource
-        Consumption — and team rules shared via a <code>.gaphunter-security-rules</code> file
+        Consumption — team rules shared via a <code>.gaphunter-security-rules</code> file
         committed to your repo, so a rule the team agreed on can't be silently disabled by one
-        person's local settings.</p>
+        person's local settings — and an optional, off-by-default local ML model that reduces
+        false positives on generic high-entropy secret matches (never on a recognized format like
+        an AWS key or a JWT — those stay exact-match). Runs 100% on-device, tuned to only suppress
+        a warning when very confident, and can be turned on from Settings once you've read what it
+        does.</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -32,12 +36,12 @@
          the Freemium pricing model (2026-08-05). optional="true": the base
          plugin (Java secrets/HTTP/TrustManager/OWASP checks) stays fully
          functional with no license at all, only the Pro tier (Kotlin
-         support, BOLA, Unrestricted Resource Consumption, team rules) gates
-         on CheckLicense.isLicensed(). release-version must share leading
-         digits with the plugin's own version, same forcing function already
-         hit with ansible-companion and openapi-companion, so this build
-         moves from 0.2.0 to the AAAA.N.N scheme. -->
-    <product-descriptor code="PAPISECURITYCOM" release-date="20260831" release-version="20262" optional="true"/>
+         support, BOLA, Unrestricted Resource Consumption, team rules, ML
+         false-positive reduction) gates on CheckLicense.isLicensed().
+         release-version must share leading digits with the plugin's own
+         version, same forcing function already hit with ansible-companion
+         and openapi-companion. -->
+    <product-descriptor code="PAPISECURITYCOM" release-date="20260917" release-version="20263" optional="true"/>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
         <supportsKotlinPluginMode supportsK2="true"/>
@@ -54,6 +58,7 @@
         <annotator language="kotlin" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ProSecurityAnnotator"/>
 
         <applicationService serviceImplementation="dev.gaphunter.apisecuritycompanion.settings.SecuritySettings"/>
+        <applicationService serviceImplementation="dev.gaphunter.apisecuritycompanion.detect.ml.MlClassifierService"/>
         <applicationConfigurable
             parentId="tools"
             instance="dev.gaphunter.apisecuritycompanion.settings.SecuritySettingsConfigurable"

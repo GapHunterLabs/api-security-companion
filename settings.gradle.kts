@@ -19,6 +19,17 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
 
+        // KInference (JetBrains-Research) -- pure-JVM ONNX inference, no
+        // native binary. Used instead of com.microsoft.onnxruntime: that
+        // native binding crashes with EXCEPTION_ACCESS_VIOLATION the
+        // moment it initializes inside a JetBrains-Runtime-hosted process
+        // (msvcp140.dll conflict against JBR's own bundled copy -- real,
+        // reproduced crash, see the class doc on MlClassifierService.kt).
+        // KInference has no native library to collide with JBR in the
+        // first place.
+        maven { url = uri("https://packages.jetbrains.team/maven/p/ki/maven") }
+        maven { url = uri("https://packages.jetbrains.team/maven/p/grazi/grazie-platform-public") }
+
         intellijPlatform {
             defaultRepositories()
         }

@@ -1,6 +1,6 @@
 package dev.gaphunter.apisecuritycompanion.settings
 
-enum class SecurityRule(val id: String, val displayName: String) {
+enum class SecurityRule(val id: String, val displayName: String, val defaultEnabled: Boolean = true) {
     SECRET_DETECTION("secretDetection", "Hardcoded secrets and API keys"),
     INSECURE_HTTP("insecureHttp", "Plaintext HTTP URLs to remote hosts"),
     TRUST_ALL_CERTIFICATES("trustAllCertificates", "TLS trust managers that accept every certificate"),
@@ -15,5 +15,19 @@ enum class SecurityRule(val id: String, val displayName: String) {
     UNRESTRICTED_RESOURCE_CONSUMPTION(
         "unrestrictedResourceConsumption",
         "Unbounded limit/page-size parameters with no upper-bound validation (Pro)",
+    ),
+
+    // Deliberately the only rule in this enum with defaultEnabled = false.
+    // Every other rule only ADDS a warning -- a false positive there is a
+    // minor annoyance. This one SUPPRESSES a warning the entropy
+    // heuristic already decided to show; its failure mode is hiding a
+    // real leaked secret, which is categorically worse. The user has to
+    // opt in on purpose after reading what it does, even with a valid
+    // Pro license -- see MlClassifierService for the conservative
+    // suppression threshold this is paired with.
+    ML_FALSE_POSITIVE_REDUCTION(
+        "mlFalsePositiveReduction",
+        "Reduce false positives on generic high-entropy secret matches using a local ML model (Pro, off by default)",
+        defaultEnabled = false,
     ),
 }
