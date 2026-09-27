@@ -7,3 +7,5 @@ bin
 build
 node_modules
 *.iml
+
+demo/generated/

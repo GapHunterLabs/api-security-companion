@@ -4,6 +4,39 @@
 
 ## [Unreleased]
 
+## [2026.4.0]
+
+### Added
+
+- **Secrets in configuration files, not only Java/Kotlin literals.** Known-format
+  tokens are now found in JSON, YAML, `.properties` and `.env` files
+  (`.env.local`, `.env.production`, ...), including the MCP server configs that
+  AI tools read (`mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json`,
+  `claude_desktop_config.json`), where API keys are routinely pasted into `env`
+  and `headers`. Free. Skipped on purpose: `.env.example`/`*.sample`/`*.template`
+  files, lock files, `google-services.json`, build and dependency directories, and
+  anything under a key called `example` or `description` (OpenAPI specs are full of
+  sample tokens). References such as `${OPENAI_API_KEY}` are never reported. New
+  rule "Known-format secrets ... in JSON, YAML, .properties and .env files" in
+  Settings -> Tools -> API Security Companion.
+- **AI-service and developer-platform token formats**, in code and in config
+  files: OpenAI, Anthropic, Hugging Face, Groq, Perplexity, Google API keys,
+  GitHub fine-grained tokens, GitLab, npm, PyPI, SendGrid, Shopify, DigitalOcean,
+  Databricks, HashiCorp Vault, and Slack incoming-webhook URLs. Each is a fixed
+  prefix plus a fixed-length body (the same bar as the Stripe rule), taken from the
+  default rule set of the open-source scanner gitleaks and each vendor's own token
+  documentation. The warning shows only a short prefix, never the whole token.
+- **Pro:** credential-named keys with a high-entropy value in configuration files
+  (`client_secret`, `DB_PASSWORD`, `Authorization: Bearer ...`, `--api-key=...`),
+  stricter than the Java-literal heuristic: the credential word has to be the
+  key's last word (`token_url` and `secretName` are settings about a secret, not
+  secrets), and URLs, paths, sentences, slugs and references are never values.
+
+### Fixed
+
+- Review/star CTA now links to this plugin's own Marketplace
+  reviews page instead of the vendor's generic plugin list.
+
 ## [2026.3.0]
 
 ### Added
@@ -132,7 +165,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.3.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.0...HEAD
+[2026.4.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.3.0...2026.4.0
 [2026.3.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.2.0...2026.3.0
 [2026.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.2...2026.2.0
 [2026.1.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.1...2026.1.2

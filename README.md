@@ -32,6 +32,20 @@ works, never freezes the IDE, and never phones home."
   variable-name + Shannon-entropy heuristic for the generic case
   (`val apiSecret = "..."` with a high-entropy value that isn't an
   obvious placeholder).
+- **Secrets in configuration files**, not only in Java/Kotlin literals:
+  known-format tokens in JSON, YAML, `.properties` and `.env` files
+  (`.env.local`, `.env.production`, ...), including the MCP server configs
+  that AI tools read (`mcp.json`, `.cursor/mcp.json`, `.vscode/mcp.json`,
+  `claude_desktop_config.json`), where API keys end up pasted into `env`
+  and `headers`. Formats covered, in code and in config: OpenAI, Anthropic,
+  Hugging Face, Groq, Perplexity, Google API keys, GitHub (classic and
+  fine-grained), GitLab, npm, PyPI, SendGrid, Shopify, DigitalOcean,
+  Databricks, HashiCorp Vault, Slack tokens and webhook URLs, Stripe, AWS,
+  JWTs and PEM private keys. Each is a fixed prefix plus a fixed-length body,
+  so a match is a near-certain finding. Template files (`.env.example`,
+  `*.sample`, `*.template`), lock files, build directories and anything
+  under an `example`/`description` key are skipped, and a reference such as
+  `${OPENAI_API_KEY}` is never reported.
 - **Plaintext HTTP** to non-local hosts.
 - **TLS trust managers that accept every certificate** (CWE-295) —
   the classic empty `checkServerTrusted`/`checkClientTrusted`.
@@ -81,6 +95,14 @@ free, no exceptions):
   — always framed as "potential," worth a manual look, not a certainty.
 - **Unrestricted Resource Consumption** (OWASP API4): flags a page-size/
   limit-shaped parameter with no upper-bound validation annotation.
+- **Credential-named keys in configuration files**: a key whose last word
+  is a credential noun (`client_secret`, `DB_PASSWORD`, `Authorization`,
+  `--api-key=...`) with a high-entropy value, in the same file types as
+  above. Stricter than the Java-literal heuristic on purpose:
+  `token_url` and `secretName` are settings *about* a secret, so the
+  credential word has to be the key's last word, and URLs, paths,
+  sentences, slugs and references are never treated as values. Known
+  formats stay free.
 - **Team rules shared via VCS**: commit a `.gaphunter-security-rules`
   file (one rule ID per line, `#` for comments) to your project root,
   and every rule listed there is enforced for every team member who
