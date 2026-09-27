@@ -2,6 +2,14 @@ package dev.gaphunter.apisecuritycompanion.settings
 
 enum class SecurityRule(val id: String, val displayName: String, val defaultEnabled: Boolean = true) {
     SECRET_DETECTION("secretDetection", "Hardcoded secrets and API keys"),
+    CONFIG_FILE_SECRETS(
+        "configFileSecrets",
+        "Known-format secrets (AI-service, cloud and developer tokens) in JSON, YAML, .properties and .env files, including MCP server configs",
+    ),
+    CONFIG_SECRET_HEURISTIC(
+        "configSecretHeuristic",
+        "Credential-named keys with a high-entropy value in configuration files (Pro)",
+    ),
     INSECURE_HTTP("insecureHttp", "Plaintext HTTP URLs to remote hosts"),
     TRUST_ALL_CERTIFICATES("trustAllCertificates", "TLS trust managers that accept every certificate"),
     EXCESSIVE_DATA_EXPOSURE("excessiveDataExposure", "REST endpoints returning a persistence entity directly"),

@@ -9,6 +9,11 @@
         endpoints that expose a persistence entity directly (OWASP API Security Top 10 —
         Excessive Data Exposure / Mass Assignment), and OpenAPI spec checks for missing
         authentication and permissive CORS.</p>
+        <p>Also finds known-format API tokens — OpenAI, Anthropic, Hugging Face, GitHub, GitLab,
+        npm, Stripe, AWS and more — in JSON, YAML, <code>.properties</code> and <code>.env</code>
+        files, including the MCP server configs AI tools read (<code>mcp.json</code>,
+        <code>claude_desktop_config.json</code>), where keys are routinely pasted in by mistake.
+        Free.</p>
         <p>No network calls, no cloud dashboard, no background processes — every check runs
         in-process during the IDE's own background highlighting pass. Built after reviewing real,
         recent complaints against the market-leading security scanners: recurring IDE freezes and
@@ -24,13 +29,17 @@
         false positives on generic high-entropy secret matches (never on a recognized format like
         an AWS key or a JWT — those stay exact-match). Runs 100% on-device, tuned to only suppress
         a warning when very confident, and can be turned on from Settings once you've read what it
-        does.</p>
+        does. Pro also adds a stricter name-plus-entropy check for credential-named keys in
+        configuration files (<code>client_secret</code>, <code>DB_PASSWORD</code>,
+        <code>Authorization: Bearer ...</code>).</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.java</depends>
     <depends>org.jetbrains.kotlin</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
+    <depends>com.intellij.modules.json</depends>
+    <depends>com.intellij.properties</depends>
 
     <!-- Real product code assigned by JetBrains Marketplace on applying for
          the Freemium pricing model (2026-08-05). optional="true": the base
@@ -41,7 +50,7 @@
          release-version must share leading digits with the plugin's own
          version, same forcing function already hit with ansible-companion
          and openapi-companion. -->
-    <product-descriptor code="PAPISECURITYCOM" release-date="20260917" release-version="20263" optional="true"/>
+    <product-descriptor code="PAPISECURITYCOM" release-date="20260926" release-version="20264" optional="true"/>
 
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
         <supportsKotlinPluginMode supportsK2="true"/>
@@ -56,6 +65,10 @@
         <annotator language="yaml" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.OpenApiSpecAnnotator"/>
         <annotator language="JAVA" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ProSecurityAnnotator"/>
         <annotator language="kotlin" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ProSecurityAnnotator"/>
+        <annotator language="JSON" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ConfigSecretAnnotator"/>
+        <annotator language="yaml" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ConfigSecretAnnotator"/>
+        <annotator language="Properties" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ConfigSecretAnnotator"/>
+        <annotator language="TEXT" implementationClass="dev.gaphunter.apisecuritycompanion.annotator.ConfigSecretAnnotator"/>
 
         <applicationService serviceImplementation="dev.gaphunter.apisecuritycompanion.settings.SecuritySettings"/>
         <applicationService serviceImplementation="dev.gaphunter.apisecuritycompanion.detect.ml.MlClassifierService"/>
