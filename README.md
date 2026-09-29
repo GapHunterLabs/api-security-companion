@@ -4,6 +4,14 @@ IntelliJ/Android Studio plugin. Lightweight, 100% local API-security
 checks for Java and Kotlin — hardcoded secrets, plaintext HTTP, TLS
 misconfiguration, and OWASP API Security Top 10 patterns.
 
+![API Security Companion: Find secrets and API security gaps in your code and config files, offline](docs/media/hero.gif)
+
+Each feature on its own:
+[AI keys in .env files](docs/media/01-ai-keys.gif) ·
+[Secrets in MCP configs](docs/media/02-mcp-configs.gif) ·
+[Credential-named keys](docs/media/03-credential-keys.gif) ·
+[Checks in your code](docs/media/04-code-checks.gif)
+
 ## Why it exists
 
 Built after reviewing real, recent reviews of the market-leading security
