@@ -126,10 +126,18 @@ free, no exceptions):
   conservative: it only suppresses a warning when confident, because
   missing a real secret is a far worse outcome than one extra warning.
 
-## Enterprise / Team Licensing
+## Buying for a team
 
-Need enterprise features, custom security rules, or team licensing?
-Contact us at **gaphunterlabs@gmail.com**.
+Pro licenses, for one developer or a whole team, are sold only through
+JetBrains Marketplace: open the [Pricing tab](https://plugins.jetbrains.com/plugin/33195-api-security-companion/pricing) on the plugin's
+page. JetBrains Marketplace handles checkout and license management.
+
+## Support
+
+- **Bugs and feature requests:** [GitHub Issues](https://github.com/GapHunterLabs/api-security-companion/issues)
+- **Questions, or custom rules for a team's codebase:** **gaphunterlabs@gmail.com**
+- **Security vulnerabilities:** report privately as described in [SECURITY.md](SECURITY.md), not in a public issue.
+- **Privacy and network behavior:** [PRIVACY.md](PRIVACY.md)
 
 ## Development
 
