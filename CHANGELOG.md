@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [2026.4.1]
+
+### Fixed
+
+- The plugin no longer ships its own copy of the Kotlin standard library
+  (2.0.0 and 1.9.10), `kotlin-test` or `kotlinx-coroutines-test`, which the
+  inference library pulled in. It now uses the IDE's own Kotlin runtime, as
+  JetBrains recommends, and the download is smaller.
+
 ### Changed
 
 - The rating prompt's local counter keeps one-way fingerprints of findings
@@ -173,7 +182,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.1...HEAD
+[2026.4.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.0...2026.4.1
 [2026.4.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.3.0...2026.4.0
 [2026.3.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.2.0...2026.3.0
 [2026.2.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.1.2...2026.2.0

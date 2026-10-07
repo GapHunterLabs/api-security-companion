@@ -38,6 +38,14 @@ dependencies {
     implementation("io.kinference:inference-core-jvm:0.2.27") {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core-jvm")
+        // KInference also pulls in its own Kotlin standard library (2.0.0 and 1.9.10), kotlin-test and
+        // kotlinx-coroutines-test, which ended up in the 2026.4.0 distribution. The IDE's plugin class loader
+        // loads most kotlin.* classes from the plugin's own jars when they are there, so a bundled stdlib can
+        // disagree with the platform's: the plugin uses the IDE's Kotlin runtime instead
+        // (https://jb.gg/intellij-platform-kotlin-stdlib), and the test libraries never belonged in it.
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-test")
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-test-jvm")
     }
 
     intellijPlatform {
