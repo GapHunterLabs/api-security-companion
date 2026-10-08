@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [2026.4.2]
+
+### Fixed
+
+- The plugin now includes `META-INF/THIRD-PARTY-NOTICES.txt` with the license notices of the
+  open-source libraries it bundles (KInference, fastutil, Okio, Wire, atomicfu, Apache Commons Math and Numbers, and SLF4J),
+  including the full text of the Apache License 2.0, as that license requires.
+
 ## [2026.4.1]
 
 ### Fixed
@@ -182,7 +190,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.1...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.2...HEAD
+[2026.4.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.1...2026.4.2
 [2026.4.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.0...2026.4.1
 [2026.4.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.3.0...2026.4.0
 [2026.3.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.2.0...2026.3.0
