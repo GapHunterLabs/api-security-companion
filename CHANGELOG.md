@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [2026.4.3]
+
+### Fixed
+
+- **Team rules work as documented.** A rule listed in `.gaphunter-security-rules` now stays on
+  for every licensed team member even after a local opt-out in Settings, free rules included.
+  Before, a local opt-out still won.
+- Team rules are a Pro feature: the file no longer turns on Pro checks (Kotlin support,
+  Broken Object Level Authorization, Unrestricted Resource Consumption, credential-named keys
+  in configuration files) without a license.
+
+### Changed
+
+- The README lists every rule ID that can go in `.gaphunter-security-rules`.
+- The plugin description lists the free and the Pro checks separately.
+
 ## [2026.4.2]
 
 ### Fixed

@@ -15,11 +15,9 @@ import com.intellij.psi.PsiPlainTextFile
 import dev.gaphunter.apisecuritycompanion.detect.ConfigContext
 import dev.gaphunter.apisecuritycompanion.detect.ConfigSecretScanner
 import dev.gaphunter.apisecuritycompanion.detect.SecretFinding
-import dev.gaphunter.apisecuritycompanion.licensing.CheckLicense
 import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
+import dev.gaphunter.apisecuritycompanion.settings.RuleGate
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
-import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
-import dev.gaphunter.apisecuritycompanion.settings.TeamPolicyLoader
 import org.jetbrains.annotations.TestOnly
 import org.jetbrains.yaml.psi.YAMLKeyValue
 import org.jetbrains.yaml.psi.YAMLScalar
@@ -33,8 +31,7 @@ import org.jetbrains.yaml.psi.YAMLScalar
  *
  * Exact-format tokens are Free (rule [SecurityRule.CONFIG_FILE_SECRETS]); the
  * name + entropy heuristic is the Pro rule [SecurityRule.CONFIG_SECRET_HEURISTIC],
- * active with a license or when the project's team policy forces it, the same
- * gate as the other Pro rules (see [ProSecurityAnnotator]).
+ * active only with a license, through the same [RuleGate] as every other rule.
  *
  * Template files (`.env.example`, `*.sample`), lock files and build output
  * directories are skipped, and so is anything under a key called `example`/
@@ -46,11 +43,11 @@ class ConfigSecretAnnotator : Annotator {
         val file = element.containingFile ?: return
         val virtualFile = file.virtualFile ?: file.originalFile.virtualFile ?: return
         if (virtualFile.length > MAX_FILE_BYTES) return
-        val settings = SecuritySettings.getInstance()
-        if (!settings.isEnabled(SecurityRule.SECRET_DETECTION) || !settings.isEnabled(SecurityRule.CONFIG_FILE_SECRETS)) return
+        val project = file.project
+        if (!RuleGate.isActive(project, SecurityRule.SECRET_DETECTION) || !RuleGate.isActive(project, SecurityRule.CONFIG_FILE_SECRETS)) return
         if (ConfigSecretScanner.isTemplateOrGeneratedFile(virtualFile.name) || ConfigSecretScanner.isInSkippedDirectory(virtualFile.path)) return
 
-        val heuristic = isHeuristicActive(file.project)
+        val heuristic = isHeuristicActive(project)
         when (element) {
             is JsonStringLiteral -> annotateJson(element, virtualFile.path, heuristic, holder)
             is YAMLScalar -> annotateYaml(element, virtualFile.path, heuristic, holder)
@@ -130,9 +127,7 @@ class ConfigSecretAnnotator : Annotator {
 
     private fun isHeuristicActive(project: Project): Boolean {
         forceHeuristicForTests?.let { return it }
-        val rule = SecurityRule.CONFIG_SECRET_HEURISTIC
-        if (!SecuritySettings.getInstance().isEnabled(rule)) return false
-        return CheckLicense.isLicensed() == true || rule.id in TeamPolicyLoader.forcedRuleIds(project)
+        return RuleGate.isActive(project, SecurityRule.CONFIG_SECRET_HEURISTIC)
     }
 
     companion object {

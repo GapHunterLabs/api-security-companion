@@ -7,8 +7,8 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import dev.gaphunter.apisecuritycompanion.detect.InsecureTransportDetector
 import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
+import dev.gaphunter.apisecuritycompanion.settings.RuleGate
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
-import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 import org.jetbrains.kotlin.psi.KtClass
 
 /**
@@ -21,15 +21,10 @@ import org.jetbrains.kotlin.psi.KtClass
 class TrustManagerAnnotator : Annotator {
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        if (!SecuritySettings.getInstance().isEnabled(SecurityRule.TRUST_ALL_CERTIFICATES)) return
+        if (element !is PsiClass && element !is KtClass) return
+        if (!RuleGate.isActive(element.project, SecurityRule.TRUST_ALL_CERTIFICATES)) return
 
-        val classText = when (element) {
-            is PsiClass -> element.text
-            is KtClass -> element.text
-            else -> return
-        }
-
-        InsecureTransportDetector.scanTrustManagerBody(classText)?.let { finding ->
+        InsecureTransportDetector.scanTrustManagerBody(element.text)?.let { finding ->
             val nameElement = when (element) {
                 is PsiClass -> element.nameIdentifier ?: element
                 is KtClass -> element.nameIdentifier ?: element

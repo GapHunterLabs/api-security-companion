@@ -7,8 +7,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import dev.gaphunter.apisecuritycompanion.detect.OpenApiSpecDetector
 import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
+import dev.gaphunter.apisecuritycompanion.settings.RuleGate
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
-import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 
 private val SPEC_MARKER = Regex("""^(openapi|swagger)\s*:\s*['"]?\d""", RegexOption.MULTILINE)
 
@@ -24,9 +24,8 @@ class OpenApiSpecAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         if (element !is PsiFile) return
 
-        val settings = SecuritySettings.getInstance()
-        val missingSecurityOn = settings.isEnabled(SecurityRule.OPENAPI_MISSING_SECURITY)
-        val corsOn = settings.isEnabled(SecurityRule.OPENAPI_PERMISSIVE_CORS)
+        val missingSecurityOn = RuleGate.isActive(element.project, SecurityRule.OPENAPI_MISSING_SECURITY)
+        val corsOn = RuleGate.isActive(element.project, SecurityRule.OPENAPI_PERMISSIVE_CORS)
         if (!missingSecurityOn && !corsOn) return
 
         val text = element.text

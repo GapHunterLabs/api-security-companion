@@ -58,8 +58,8 @@ works, never freezes the IDE, and never phones home."
 - **TLS trust managers that accept every certificate** (CWE-295) —
   the classic empty `checkServerTrusted`/`checkClientTrusted`.
 - **Excessive Data Exposure / Mass Assignment** (OWASP API Security Top
-  10, Java and Kotlin): REST endpoints that return a persistence entity
-  directly, or bind a request body straight onto one.
+  10, Java; Kotlin is part of Pro): REST endpoints that return a
+  persistence entity directly, or bind a request body straight onto one.
 - **OpenAPI spec checks**: an empty top-level `security:` scheme, and
   wildcard CORS (`Access-Control-Allow-Origin: *`) combined with
   `Access-Control-Allow-Credentials: true`.
@@ -112,10 +112,11 @@ free, no exceptions):
   sentences, slugs and references are never treated as values. Known
   formats stay free.
 - **Team rules shared via VCS**: commit a `.gaphunter-security-rules`
-  file (one rule ID per line, `#` for comments) to your project root,
-  and every rule listed there is enforced for every team member who
-  opens the project — a rule the team agreed on can't be silently
-  disabled by one person's local Settings.
+  file (one rule ID per line, `#` for comments; IDs below) to your project
+  root. For every licensed team member who opens the project, each rule
+  listed there stays on even after a local opt-out in Settings — a rule
+  the team agreed on can't be silently disabled by one person. Without a
+  license the file changes nothing.
 - **ML false-positive reduction on generic secret matches** (off by
   default, even with a license — enable it from Settings): a small
   model (under 20KB, no network calls, no telemetry) re-checks the
@@ -125,6 +126,25 @@ free, no exceptions):
   JWT — those are already exact matches. Tuned deliberately
   conservative: it only suppresses a warning when confident, because
   missing a real secret is a far worse outcome than one extra warning.
+
+### Rule IDs
+
+The IDs to use in `.gaphunter-security-rules`:
+
+| Rule ID | Check | Tier |
+|---|---|---|
+| `secretDetection` | Hardcoded secrets and API keys in Java and Kotlin | Free |
+| `configFileSecrets` | Known-format tokens in JSON, YAML, `.properties` and `.env` files (runs together with `secretDetection`) | Free |
+| `insecureHttp` | Plaintext HTTP URLs to remote hosts | Free |
+| `trustAllCertificates` | TLS trust managers that accept every certificate | Free |
+| `excessiveDataExposure` | REST endpoints returning a persistence entity directly | Free in Java, Pro in Kotlin |
+| `massAssignment` | Write endpoints binding a request body onto a persistence entity | Free in Java, Pro in Kotlin |
+| `openApiMissingSecurity` | OpenAPI specs with an empty top-level security requirement | Free |
+| `openApiPermissiveCors` | OpenAPI specs with wildcard CORS combined with credentials | Free |
+| `configSecretHeuristic` | Credential-named keys with a high-entropy value in configuration files | Pro |
+| `brokenObjectLevelAuth` | Broken Object Level Authorization (OWASP API1) | Pro |
+| `unrestrictedResourceConsumption` | Unrestricted Resource Consumption (OWASP API4) | Pro |
+| `mlFalsePositiveReduction` | ML false-positive reduction; can't be switched on through the team file | Pro |
 
 ## Buying for a team
 

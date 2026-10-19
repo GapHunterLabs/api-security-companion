@@ -8,8 +8,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import dev.gaphunter.apisecuritycompanion.detect.ExcessiveExposureDetector
 import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
+import dev.gaphunter.apisecuritycompanion.settings.RuleGate
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
-import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 
 /**
  * Java-only for v0.1 — Kotlin's annotation PSI (`KtAnnotationEntry`)
@@ -21,9 +21,8 @@ class EntityExposureAnnotator : Annotator {
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         if (element !is PsiMethod) return
-        val settings = SecuritySettings.getInstance()
-        val exposureOn = settings.isEnabled(SecurityRule.EXCESSIVE_DATA_EXPOSURE)
-        val massAssignmentOn = settings.isEnabled(SecurityRule.MASS_ASSIGNMENT)
+        val exposureOn = RuleGate.isActive(element.project, SecurityRule.EXCESSIVE_DATA_EXPOSURE)
+        val massAssignmentOn = RuleGate.isActive(element.project, SecurityRule.MASS_ASSIGNMENT)
         if (!exposureOn && !massAssignmentOn) return
 
         val methodAnnotations = element.annotations.mapNotNull { it.nameReferenceElement?.referenceName }.toSet()

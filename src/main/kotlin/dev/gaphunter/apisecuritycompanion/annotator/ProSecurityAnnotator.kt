@@ -11,11 +11,9 @@ import dev.gaphunter.apisecuritycompanion.detect.ExcessiveExposureDetector
 import dev.gaphunter.apisecuritycompanion.detect.KotlinTypeAnnotationResolver
 import dev.gaphunter.apisecuritycompanion.detect.ResourceConsumptionDetector
 import dev.gaphunter.apisecuritycompanion.detect.RestEndpointAnnotations
-import dev.gaphunter.apisecuritycompanion.licensing.CheckLicense
 import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
+import dev.gaphunter.apisecuritycompanion.settings.RuleGate
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
-import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
-import dev.gaphunter.apisecuritycompanion.settings.TeamPolicyLoader
 import org.jetbrains.kotlin.psi.KtNamedFunction
 
 /**
@@ -26,11 +24,10 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
  *
  * Registered unconditionally, same as every other annotator in this
  * plugin (the plugin loads identically for everyone, only the specific
- * paid feature gates on license) -- a rule only
- * produces annotations when [isRuleActive] is true, i.e. the user has a
- * valid license OR the project's `.gaphunter-security-rules` team
- * policy file forces that specific rule regardless of individual
- * licensing (see [TeamPolicyLoader]). Kotlin type resolution itself
+ * paid feature gates on license) -- everything here is Pro coverage, so
+ * [RuleGate] only runs it with a valid license, and a licensed member
+ * also keeps the rules the project's team rules file lists even after
+ * turning them off locally. Kotlin type resolution itself
  * lives in [KotlinTypeAnnotationResolver], kept separate so it's
  * directly unit-testable without needing to fake a license.
  */
@@ -43,12 +40,9 @@ class ProSecurityAnnotator : Annotator {
         }
     }
 
-    private fun isRuleActive(project: Project, rule: SecurityRule): Boolean {
-        if (!SecuritySettings.getInstance().isEnabled(rule)) return false
-        val licensed = CheckLicense.isLicensed() == true
-        val teamForced = rule.id in TeamPolicyLoader.forcedRuleIds(project)
-        return licensed || teamForced
-    }
+    // Pro coverage even for the two free OWASP rule IDs: their Kotlin path lives only here.
+    private fun isRuleActive(project: Project, rule: SecurityRule): Boolean =
+        RuleGate.isActive(project, rule, proCoverage = true)
 
     private fun recordHitFor(element: PsiElement, kind: String) {
         val file = element.containingFile

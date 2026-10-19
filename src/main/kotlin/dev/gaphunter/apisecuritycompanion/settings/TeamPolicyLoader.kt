@@ -8,10 +8,11 @@ import java.util.concurrent.ConcurrentHashMap
  * "Team rules shared via VCS" (Pro tier): a `.gaphunter-security-rules`
  * file at the project root, one rule ID per line (`#` for comments,
  * matching `SecurityRule.id`), committed to the repo like any other
- * project file. Any rule ID listed there is enforced for every team
- * member who opens this project, regardless of what they've disabled
- * locally in Settings -- the whole point is a rule an individual can't
- * silently opt out of once the team has agreed to it.
+ * project file. Any rule ID listed there stays on for every licensed
+ * team member who opens this project, regardless of what they've
+ * disabled locally in Settings -- the whole point is a rule an
+ * individual can't silently opt out of once the team has agreed to it.
+ * Without a license the file changes nothing; [RuleGate] applies it.
  *
  * Deliberately a plain line-based text format, not JSON/YAML -- no
  * parser needed at all, trivially git-diff-friendly, and this plugin

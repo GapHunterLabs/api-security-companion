@@ -3,6 +3,7 @@ package dev.gaphunter.apisecuritycompanion.annotator
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteralExpression
@@ -14,10 +15,9 @@ import com.intellij.psi.PsiReferenceExpression
 import dev.gaphunter.apisecuritycompanion.detect.InsecureTransportDetector
 import dev.gaphunter.apisecuritycompanion.detect.SecretDetector
 import dev.gaphunter.apisecuritycompanion.detect.ml.MlClassifierService
-import dev.gaphunter.apisecuritycompanion.licensing.CheckLicense
 import dev.gaphunter.apisecuritycompanion.review.ReviewPrompt
+import dev.gaphunter.apisecuritycompanion.settings.RuleGate
 import dev.gaphunter.apisecuritycompanion.settings.SecurityRule
-import dev.gaphunter.apisecuritycompanion.settings.SecuritySettings
 import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
@@ -31,11 +31,9 @@ import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 class SecretAndTransportAnnotator : Annotator {
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        val settings = SecuritySettings.getInstance()
-        val secretsOn = settings.isEnabled(SecurityRule.SECRET_DETECTION)
-        val httpOn = settings.isEnabled(SecurityRule.INSECURE_HTTP)
-        if (!secretsOn && !httpOn) return
-
+        // Read before the smart cast below: after it, the compiler can type the
+        // call through an experimental interface both branches share.
+        val project = element.project
         val (value, variableHint) = when (element) {
             is PsiLiteralValue -> {
                 val v = element.value as? String ?: return
@@ -49,11 +47,16 @@ class SecretAndTransportAnnotator : Annotator {
             else -> return
         }
 
+        // Gated after the literal check: annotate() runs for every element in the file.
+        val secretsOn = RuleGate.isActive(project, SecurityRule.SECRET_DETECTION)
+        val httpOn = RuleGate.isActive(project, SecurityRule.INSECURE_HTTP)
+        if (!secretsOn && !httpOn) return
+
         val range: TextRange = element.getTextRange()
 
         if (secretsOn) {
             SecretDetector.scanLiteral(value, variableHint)?.let { finding ->
-                if (finding.kind == "GENERIC_HIGH_ENTROPY" && isMlFalsePositiveReductionActive()) {
+                if (finding.kind == "GENERIC_HIGH_ENTROPY" && isMlFalsePositiveReductionActive(project)) {
                     if (MlClassifierService.getInstance().isConfidentFalsePositive(value)) return@let
                 }
                 holder.newAnnotation(HighlightSeverity.WARNING, "Potential secret: ${finding.description}")
@@ -81,17 +84,14 @@ class SecretAndTransportAnnotator : Annotator {
      * secret-by-signature detection and insecure-HTTP detection are
      * still fully Free, ungated, unaffected by licensing either way.
      *
-     * Deliberately does NOT consult [dev.gaphunter.apisecuritycompanion.settings.TeamPolicyLoader]
-     * the way other Pro rules can be team-forced on -- that mechanism
-     * exists to force an org-agreed rule ON for every team member, but
+     * The team rules file can't switch it on ([SecurityRule.teamEnforceable]):
+     * that file keeps an org-agreed rule ON for every licensed member, but
      * this rule SUPPRESSES warnings, so silently force-enabling it via a
      * committed policy file would be the opposite of the "opt in after
      * you understand what this does" design goal.
      */
-    private fun isMlFalsePositiveReductionActive(): Boolean {
-        if (!SecuritySettings.getInstance().isEnabled(SecurityRule.ML_FALSE_POSITIVE_REDUCTION)) return false
-        return CheckLicense.isLicensed() == true
-    }
+    private fun isMlFalsePositiveReductionActive(project: Project): Boolean =
+        RuleGate.isActive(project, SecurityRule.ML_FALSE_POSITIVE_REDUCTION)
 
     private fun recordHitFor(element: PsiElement, kind: String) {
         val file = element.containingFile

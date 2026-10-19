@@ -4,34 +4,27 @@
     <name>API Security Companion</name>
     <vendor>Gap Hunter Labs</vendor>
     <description><![CDATA[
-        <p>Lightweight, 100% local API-security checks for Java and Kotlin: hardcoded secrets and
-        API keys, plaintext HTTP URLs, TLS trust managers that accept every certificate, REST
-        endpoints that expose a persistence entity directly (OWASP API Security Top 10 —
-        Excessive Data Exposure / Mass Assignment), and OpenAPI spec checks for missing
-        authentication and permissive CORS.</p>
-        <p>Also finds known-format API tokens — OpenAI, Anthropic, Hugging Face, GitHub, GitLab,
-        npm, Stripe, AWS and more — in JSON, YAML, <code>.properties</code> and <code>.env</code>
-        files, including the MCP server configs AI tools read (<code>mcp.json</code>,
-        <code>claude_desktop_config.json</code>), where keys are routinely pasted in by mistake.
-        Free.</p>
-        <p>No network calls, no cloud dashboard, no background processes — every check runs
-        in-process during the IDE's own background highlighting pass. Built after reviewing real,
-        recent complaints against the market-leading security scanners: recurring IDE freezes and
-        crashes during scans, broken suppression/ignore controls, and an "Ultimate Plus" paywall
-        undocumented until checkout. Every rule here can be turned off individually, and none of
-        them are held back behind a paid tier.</p>
-        <p>API Security Companion Pro (optional paid tier): Kotlin support for Excessive Data
-        Exposure/Mass Assignment (the free tier's checks are Java-only), two more OWASP API
-        Security Top 10 checks — Broken Object Level Authorization and Unrestricted Resource
-        Consumption — team rules shared via a <code>.gaphunter-security-rules</code> file
-        committed to your repo, so a rule the team agreed on can't be silently disabled by one
-        person's local settings — and an optional, off-by-default local ML model that reduces
-        false positives on generic high-entropy secret matches (never on a recognized format like
-        an AWS key or a JWT — those stay exact-match). Runs 100% on-device, tuned to only suppress
-        a warning when very confident, and can be turned on from Settings once you've read what it
-        does. Pro also adds a stricter name-plus-entropy check for credential-named keys in
-        configuration files (<code>client_secret</code>, <code>DB_PASSWORD</code>,
-        <code>Authorization: Bearer ...</code>).</p>
+        <p>Security checks for Java and Kotlin APIs, run inside the IDE's own highlighting pass: hardcoded secrets, leaked tokens in config files, plaintext HTTP, trust-all TLS and OWASP API Top 10 risks. 100% local: no account, no cloud scan, no network calls.</p>
+        <p><b>Free</b></p>
+        <ul>
+          <li><b>Hardcoded secrets</b> in Java and Kotlin: AWS keys, GitHub and Slack tokens, Stripe keys, JWTs and PEM private keys, plus a name-and-entropy check for generic secrets.</li>
+          <li><b>Leaked tokens in config files</b> (JSON, YAML, <code>.properties</code>, <code>.env</code>), including MCP server configs such as <code>mcp.json</code> and <code>claude_desktop_config.json</code>: 20+ fixed formats, among them OpenAI, Anthropic, Hugging Face, GitHub, GitLab, npm, PyPI, Stripe and AWS. Template files and <code>${VAR}</code> references are skipped.</li>
+          <li><b>Plaintext HTTP</b> URLs to non-local hosts.</li>
+          <li><b>TLS trust managers that accept every certificate</b> (CWE-295), in Java and Kotlin.</li>
+          <li><b>OWASP API Security Top 10:</b> Excessive Data Exposure and Mass Assignment in Java REST endpoints.</li>
+          <li><b>OpenAPI specs (YAML):</b> an empty top-level security requirement, and wildcard CORS combined with credentials.</li>
+        </ul>
+        <p>Every rule can be turned off individually in Settings.</p>
+        <p><b>API Security Companion Pro</b> (paid, with a free trial)</p>
+        <ul>
+          <li><b>Kotlin support</b> for Excessive Data Exposure and Mass Assignment, including Kotlin code that uses Java entities.</li>
+          <li><b>Broken Object Level Authorization</b> (OWASP API1): endpoints that take an object ID with no visible ownership check, reported as potential issues to review.</li>
+          <li><b>Unrestricted Resource Consumption</b> (OWASP API4): page-size and limit parameters with no upper bound.</li>
+          <li><b>Credential-named keys</b> in config files (<code>client_secret</code>, <code>DB_PASSWORD</code>, <code>Authorization: Bearer ...</code>) with a high-entropy value.</li>
+          <li><b>Team rules:</b> commit a <code>.gaphunter-security-rules</code> file, and every rule it lists stays on for each licensed team member, even if someone turns it off locally.</li>
+          <li><b>On-device ML filter</b>, off by default: fewer false positives on generic high-entropy matches. It never touches recognized formats such as AWS keys or JWTs.</li>
+        </ul>
+        <p><a href="https://github.com/GapHunterLabs/api-security-companion">Documentation and rule IDs</a> · <a href="https://github.com/GapHunterLabs/api-security-companion/issues">Report an issue</a></p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
