@@ -206,7 +206,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.2...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.3...HEAD
+[2026.4.3]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.2...2026.4.3
 [2026.4.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.1...2026.4.2
 [2026.4.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.0...2026.4.1
 [2026.4.0]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.3.0...2026.4.0
