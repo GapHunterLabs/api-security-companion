@@ -6,6 +6,12 @@
 
 ## [2026.4.4]
 
+### Added
+
+- **Error reports.** When the IDE attributes an exception or a freeze to the plugin, you can send it to me from
+  the IDE's error dialog (JetBrains Marketplace error reporting). Nothing is sent unless you send it; PRIVACY.md
+  describes what a report contains.
+
 ### Fixed
 
 - **A very long value in a configuration file no longer breaks the secret check.** A value of about a megabyte made of
