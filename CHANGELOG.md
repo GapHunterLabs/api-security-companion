@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **A very long value in a configuration file no longer breaks the secret check.** A value of about a megabyte made of
+  words joined by `.`, `_` or `-` (under a key like `password`) made the configuration inspection fail with a stack
+  overflow; it is now checked in a single pass.
+- **The JWT rule stays fast on long lines.** A long run like `-eyJ-eyJ...` with no `.` took time that grew with the
+  square of its length. A JWT glued to a preceding letter, digit, `_` or `-` (`x-eyJ...`) is no longer reported; one
+  after a space, a quote or `=` still is.
+
 ## [2026.4.3]
 
 ### Fixed
