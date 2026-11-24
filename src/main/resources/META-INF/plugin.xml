@@ -71,5 +71,6 @@
             id="dev.gaphunter.apisecuritycompanion.settings.SecuritySettingsConfigurable"
             displayName="API Security Companion"/>
         <notificationGroup id="API Security Companion" displayType="BALLOON"/>
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
     </extensions>
 </idea-plugin>

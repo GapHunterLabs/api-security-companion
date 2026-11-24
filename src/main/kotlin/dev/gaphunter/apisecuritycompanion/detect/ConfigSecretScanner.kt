@@ -46,10 +46,32 @@ object ConfigSecretScanner {
     private val FLAG_ASSIGNMENT = Regex("""^--?([A-Za-z][A-Za-z0-9_.-]*)=(.+)$""", RegexOption.DOT_MATCHES_ALL)
 
     private val USERINFO_IN_URL = Regex("""://[^/@\s]+:[^/@\s]+@""")
-    // Letters only: `authorization-code-grant` is a slug, `acme_deploy_9f8e7d6c5b4a3210` is not (a digit run is what a
-    // generated key looks like, and the corpus run showed a slug guard that allowed digits hid exactly that key).
-    private val LOWER_SLUG = Regex("""[a-z]+([_.-][a-z]+)+""")
-    private val UPPER_SLUG = Regex("""[A-Z]+([_.-][A-Z]+)+""")
+    /**
+     * `authorization-code-grant`, `GITHUB_TOKEN_NAME`: words of one letter case joined by single `_`, `.` or `-`, at
+     * least two words. Letters only: `acme_deploy_9f8e7d6c5b4a3210` is not a slug (a digit run is what a generated key
+     * looks like, and the corpus run showed a slug guard that allowed digits hid exactly that key). A loop, not the
+     * former `[a-z]+([_.-][a-z]+)+`: Java runs a repeated group recursively, one stack frame per word, and a 1 MB
+     * value like `a.a.a...` threw StackOverflowError out of the inspection.
+     */
+    internal fun isSlug(value: String): Boolean {
+        if (value.isEmpty()) return false
+        val lower = value[0] in 'a'..'z'
+        if (!lower && value[0] !in 'A'..'Z') return false
+        var separators = 0
+        var previousWasSeparator = false
+        for (c in value) {
+            when {
+                c == '_' || c == '.' || c == '-' -> {
+                    if (previousWasSeparator) return false
+                    previousWasSeparator = true
+                    separators++
+                }
+                (lower && c in 'a'..'z') || (!lower && c in 'A'..'Z') -> previousWasSeparator = false
+                else -> return false
+            }
+        }
+        return separators > 0 && !previousWasSeparator
+    }
 
     private val ENV_LINE = Regex("""^(\s*(?:export\s+)?)([A-Za-z_][A-Za-z0-9_.-]*)(\s*=\s*)(.*)$""")
 
@@ -128,7 +150,7 @@ object ConfigSecretScanner {
         if (value.startsWith("/") || value.startsWith("./") || value.startsWith("~") || value.contains('\\')) return false
         if (value.contains("://") && !USERINFO_IN_URL.containsMatchIn(value)) return false
         // `authorization-code-grant`, `GITHUB_TOKEN_NAME`: identifiers and slugs, not credentials.
-        if (LOWER_SLUG.matches(value) || UPPER_SLUG.matches(value)) return false
+        if (isSlug(value)) return false
         val classes = listOf(
             value.any { it.isLowerCase() }, value.any { it.isUpperCase() },
             value.any { it.isDigit() }, value.any { !it.isLetterOrDigit() },

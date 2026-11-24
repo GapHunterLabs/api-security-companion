@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [2026.4.4]
+
+### Added
+
+- **Error reports.** When the IDE attributes an exception or a freeze to the plugin, you can send it to me from
+  the IDE's error dialog (JetBrains Marketplace error reporting). Nothing is sent unless you send it; PRIVACY.md
+  describes what a report contains.
+
+### Fixed
+
+- **A very long value in a configuration file no longer breaks the secret check.** A value of about a megabyte made of
+  words joined by `.`, `_` or `-` (under a key like `password`) made the configuration inspection fail with a stack
+  overflow; it is now checked in a single pass.
+- **The JWT rule stays fast on long lines.** A long run like `-eyJ-eyJ...` with no `.` took time that grew with the
+  square of its length. A JWT glued to a preceding letter, digit, `_` or `-` (`x-eyJ...`) is no longer reported; one
+  after a space, a quote or `=` still is.
+
 ## [2026.4.3]
 
 ### Fixed
@@ -206,7 +223,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.3...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.4...HEAD
+[2026.4.4]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.3...2026.4.4
 [2026.4.3]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.2...2026.4.3
 [2026.4.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.1...2026.4.2
 [2026.4.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.0...2026.4.1

@@ -43,7 +43,11 @@ object SecretDetector {
         Signature("SLACK_TOKEN", Regex("""\bxox[baprs]-[0-9A-Za-z-]{10,}\b""")) {
             "Looks like a Slack API token"
         },
-        Signature("JWT", Regex("""\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\b""")) {
+        // Starts only where the previous character is not a base64url character (was `\b`, which also allowed a start
+        // right after `-`): a long `-eyJ-eyJ...` run with no `.` gave one start per `eyJ`, each scanning to the end of
+        // the run, so the time grew with the square of the length. Only change in what matches: a JWT glued to a
+        // preceding base64url character (`x-eyJ...`) is not reported.
+        Signature("JWT", Regex("""(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\b""")) {
             "Looks like a JWT (base64url header.payload.signature)"
         },
         Signature("PRIVATE_KEY", Regex("""-----BEGIN ((RSA|EC|OPENSSH|DSA|ENCRYPTED) )?PRIVATE KEY-----""")) {
