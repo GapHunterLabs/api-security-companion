@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2026.4.4]
+
 ### Fixed
 
 - **A very long value in a configuration file no longer breaks the secret check.** A value of about a megabyte made of
@@ -215,7 +217,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.3...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.4...HEAD
+[2026.4.4]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.3...2026.4.4
 [2026.4.3]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.2...2026.4.3
 [2026.4.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.1...2026.4.2
 [2026.4.1]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.0...2026.4.1
