@@ -19,7 +19,46 @@ data class SecretFinding(val kind: String, val description: String)
  */
 object SecretDetector {
 
-    private class Signature(val kind: String, val regex: Regex, val describe: (String) -> String)
+    /**
+     * The literals every match must contain ([LITERALS]) are checked with a plain `contains` before the regex runs: with 32 signatures, a line no longer pays 32 regex passes for the few that could
+     * match. The check only skips a regex that could not match, so what is detected does not change.
+     */
+    private class Signature(val kind: String, val regex: Regex, val describe: (String) -> String) {
+        val literals: List<String> = LITERALS[kind] ?: emptyList()
+    }
+
+    /** Text every match of a rule contains (one of them); rules not listed always run their regex. */
+    private val LITERALS: Map<String, List<String>> = mapOf(
+        "AWS_ACCESS_KEY" to listOf("AKIA", "ASIA"), "GITHUB_TOKEN" to listOf("ghp_", "gho_", "ghu_", "ghs_", "ghr_"),
+        "SLACK_TOKEN" to listOf("xoxb-", "xoxa-", "xoxp-", "xoxr-", "xoxs-"), "JWT" to listOf("eyJ"), "PRIVATE_KEY" to listOf("-----BEGIN"),
+        "STRIPE_KEY" to listOf("k_live_", "k_test_"), "OPENAI_API_KEY" to listOf("sk-"), "ANTHROPIC_API_KEY" to listOf("sk-ant-"),
+        "HUGGINGFACE_TOKEN" to listOf("hf_", "api_org_"), "GROQ_API_KEY" to listOf("gsk_"), "PERPLEXITY_API_KEY" to listOf("pplx-"),
+        "GOOGLE_API_KEY" to listOf("AIza"), "GITHUB_FINE_GRAINED_TOKEN" to listOf("github_pat_"), "GITLAB_TOKEN" to listOf("glpat-"),
+        "NPM_TOKEN" to listOf("npm_"), "PYPI_TOKEN" to listOf("pypi-AgEIcHlwaS5vcmc"), "SENDGRID_API_KEY" to listOf("SG."),
+        "SHOPIFY_TOKEN" to listOf("shpat_", "shpca_", "shppa_", "shpss_"), "DIGITALOCEAN_TOKEN" to listOf("dop_v1_"),
+        "DATABRICKS_TOKEN" to listOf("dapi"), "VAULT_TOKEN" to listOf("hvs."), "SLACK_WEBHOOK" to listOf("hooks.slack.com/"),
+        "ATLASSIAN_API_TOKEN" to listOf("ATATT3"), "DOPPLER_TOKEN" to listOf("dp.pt."), "AGE_SECRET_KEY" to listOf("AGE-SECRET-KEY-1"),
+        "LINEAR_API_KEY" to listOf("lin_api_"), "POSTMAN_API_KEY" to listOf("PMAK-"), "GRAFANA_SERVICE_ACCOUNT_TOKEN" to listOf("glsa_"),
+        "SQUARE_ACCESS_TOKEN" to listOf("sq0atp-"), "PUTTY_PRIVATE_KEY" to listOf("PuTTY-User-Key-File-"),
+        "AZURE_STORAGE_KEY" to listOf("AccountKey="), "BCRYPT_HASH" to listOf("$2"),
+    )
+
+    /** Characters people use to redact a token by hand (`ghp_XXXX...`, `sk-proj-****...`). */
+    private const val REDACTION = "Xx*#.-_0"
+
+    /**
+     * A redacted example, not a leak: at least 90 % of the body after the literal prefix is redaction characters
+     * (a real token never comes close), or it is AWS's own documentation example key, which ends in `EXAMPLE`
+     * (`AKIAIOSFODNN7EXAMPLE`). Headers (PEM, PuTTY) have no body to judge.
+     */
+    private fun isPlaceholder(signature: Signature, match: String): Boolean {
+        if (signature.kind == "PRIVATE_KEY" || signature.kind == "PUTTY_PRIVATE_KEY") return false
+        if (signature.kind == "AWS_ACCESS_KEY" && match.endsWith("EXAMPLE")) return true
+        val lit = signature.literals.firstOrNull { match.contains(it) }
+        val body = if (lit == null) match else match.substring(match.indexOf(lit) + lit.length)
+        if (body.length < 8) return false
+        return body.count { it in REDACTION } >= body.length * 0.9
+    }
 
     /**
      * Formats with a distinctive prefix and a fixed-shape body, so a match is
@@ -50,7 +89,9 @@ object SecretDetector {
         Signature("JWT", Regex("""(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\b""")) {
             "Looks like a JWT (base64url header.payload.signature)"
         },
-        Signature("PRIVATE_KEY", Regex("""-----BEGIN ((RSA|EC|OPENSSH|DSA|ENCRYPTED) )?PRIVATE KEY-----""")) {
+        // Any PEM or PGP private key header: RSA, EC, DSA, OPENSSH, ENCRYPTED, PKCS#8 and `PGP PRIVATE KEY BLOCK`
+        // (the general header of gitleaks' private-key rule; the message stays the one users know).
+        Signature("PRIVATE_KEY", Regex("""-----BEGIN[ A-Z0-9_-]{0,100}PRIVATE KEY(?: BLOCK)?-----""")) {
             "Contains a PEM private key block"
         },
         // Stripe secret/restricted API keys -- sk_live_.../rk_live_...
@@ -102,7 +143,32 @@ object SecretDetector {
             "SLACK_WEBHOOK",
             Regex("""hooks\.slack\.com/(?:services|workflows|triggers)/[A-Za-z0-9+/]{43,56}"""),
         ) { "Contains a Slack incoming-webhook URL (anyone with it can post to the channel)" },
+
+        // --- same as secret-scanner-cli 0.3.0: shapes from gitleaks' rule set (read 2026-11-27) where they need no
+        // nearby keyword, and three fixed formats from their own specification (PuTTY's key file header, Azure
+        // Storage's 64-byte account key in a connection string, bcrypt's `$2a$NN$` + 53 characters) ---
+        Signature("ATLASSIAN_API_TOKEN", Regex("""\bATATT3[A-Za-z0-9_\-=]{186}(?![A-Za-z0-9_\-=])""")) { "Looks like an Atlassian API token" },
+        Signature("DOPPLER_TOKEN", Regex("""\bdp\.pt\.[A-Za-z0-9]{43}(?![A-Za-z0-9])""")) { "Looks like a Doppler personal token" },
+        Signature("AGE_SECRET_KEY", Regex("""\bAGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}(?![A-Z0-9])""")) {
+            "Contains an age encryption secret key"
+        },
+        Signature("LINEAR_API_KEY", Regex("""\blin_api_[A-Za-z0-9]{40}(?![A-Za-z0-9])""")) { "Looks like a Linear API key" },
+        Signature("POSTMAN_API_KEY", Regex("""\bPMAK-[A-Fa-f0-9]{24}-[A-Fa-f0-9]{34}(?![A-Fa-f0-9])""")) { "Looks like a Postman API key" },
+        Signature("GRAFANA_SERVICE_ACCOUNT_TOKEN", Regex("""\bglsa_[A-Za-z0-9]{32}_[A-Fa-f0-9]{8}(?![A-Za-z0-9_])""")) {
+            "Looks like a Grafana service account token"
+        },
+        Signature("SQUARE_ACCESS_TOKEN", Regex("""\bsq0atp-[\w-]{22,60}(?![\w-])""")) { "Looks like a Square access token" },
+        Signature("PUTTY_PRIVATE_KEY", Regex("""PuTTY-User-Key-File-[23]:[ \t]*[A-Za-z0-9@.-]+""")) { "Contains a PuTTY private key file" },
+        Signature("AZURE_STORAGE_KEY", Regex("""AccountKey=[A-Za-z0-9+/]{86}==""")) {
+            "Contains an Azure Storage account key in a connection string"
+        },
+        Signature("BCRYPT_HASH", Regex("""\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}(?![./A-Za-z0-9])""")) {
+            "Contains a bcrypt password hash (crackable offline if the password is weak)"
+        },
     )
+
+    /** Every rule id the signatures can report, in a fixed order. */
+    val SIGNATURE_KINDS: List<String> get() = SIGNATURES.map { it.kind }
 
     private val SECRET_LIKE_NAME = Regex(
         """(api[_-]?key|secret|token|password|passwd|pwd|access[_-]?key|private[_-]?key)""",
@@ -110,18 +176,24 @@ object SecretDetector {
     )
 
     private val OBVIOUS_PLACEHOLDER = Regex(
-        """^(|changeme|change[_-]?me|todo|fixme|xxx+|your[_-].*|placeholder|example|test|dummy|<.*>|\$\{.*})$""",
+        """^(|changeme|change[_-]?me|replace[_-]?me|todo|fixme|xxx+|your[_-].*|placeholder|example|test|dummy|<.*>|\$\{.*})$""",
         RegexOption.IGNORE_CASE,
     )
 
     private const val MIN_ENTROPY_LENGTH = 12
     private const val MIN_ENTROPY_BITS_PER_CHAR = 3.3
 
-    /** Only the exact-format signatures -- no name hint, no entropy guess. */
+    /**
+     * Only the exact-format signatures -- no name hint, no entropy guess. The first match that is not a
+     * redacted placeholder wins, so `ghp_XXXX... and ghp_<real>` on one line still reports the real one.
+     */
     fun scanSignatures(value: String): SecretFinding? {
         for (signature in SIGNATURES) {
-            val match = signature.regex.find(value) ?: continue
-            return SecretFinding(signature.kind, signature.describe(match.value))
+            if (signature.literals.isNotEmpty() && signature.literals.none { value.contains(it) }) continue
+            for (match in signature.regex.findAll(value)) {
+                if (isPlaceholder(signature, match.value)) continue
+                return SecretFinding(signature.kind, signature.describe(match.value))
+            }
         }
         return null
     }

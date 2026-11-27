@@ -75,6 +75,20 @@ class ConfigSecretAnnotatorTest : BasePlatformTestCase() {
         assertEquals("language of .env is ${myFixture.file.language}: $warnings", 1, warnings.size)
     }
 
+    fun testADotEnvSavedWithAByteOrderMarkReportsItsFirstLine() {
+        // A real file with the UTF-8 mark in its bytes, so the platform's own BOM handling is part of the test.
+        val bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
+        val file = myFixture.tempDirFixture.createFile(".env")
+        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
+            file.setBinaryContent(bom + "OPENAI_API_KEY=$openAiKey\nPORT=8080\n".toByteArray(Charsets.UTF_8))
+        }
+        myFixture.configureFromExistingVirtualFile(file)
+        val warnings = myFixture.doHighlighting()
+            .filter { it.severity == HighlightSeverity.WARNING && it.description?.startsWith("Potential secret") == true }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertEquals(openAiKey, myFixture.file.text.substring(warnings[0].startOffset, warnings[0].endOffset))
+    }
+
     fun testTemplateAndLockFilesAreSkipped() {
         assertEquals(emptyList<String>(), secretWarnings(".env.example", "OPENAI_API_KEY=$openAiKey\n"))
         assertEquals(emptyList<String>(), secretWarnings("package-lock.json", """{"token": "$openAiKey"}"""))
