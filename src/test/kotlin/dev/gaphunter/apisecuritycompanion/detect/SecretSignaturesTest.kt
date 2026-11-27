@@ -103,8 +103,9 @@ class SecretSignaturesTest {
     @Test
     fun theOlderSignaturesKeepTheirOrderAndMessages() {
         // Stripe was the last of the original six; a string matching two formats reports the earlier one.
-        assertEquals("AWS_ACCESS_KEY", kind("AKIA" + "IOSFODNN7EXAMPLE"))
-        assertEquals("Looks like an AWS access key ID (AKIAIOSF...)", SecretDetector.scanLiteral("AKIA" + "IOSFODNN7EXAMPLE")?.description)
+        // A made-up key: AWS's documentation example (ending in EXAMPLE) is a placeholder since this version.
+        assertEquals("AWS_ACCESS_KEY", kind("AKIA" + "Q7LM2XV9RT4KP8WZ"))
+        assertEquals("Looks like an AWS access key ID (AKIAQ7LM...)", SecretDetector.scanLiteral("AKIA" + "Q7LM2XV9RT4KP8WZ")?.description)
         assertEquals("Looks like a Stripe secret/restricted API key (sk_live_4eC...)", SecretDetector.scanLiteral("sk_" + "live_" + "4eC39HqLyjWDarjtT1zdp7dc")?.description)
     }
 

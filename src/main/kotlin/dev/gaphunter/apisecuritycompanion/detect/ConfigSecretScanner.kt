@@ -28,18 +28,6 @@ object ConfigSecretScanner {
     /** A whole-value reference to something defined elsewhere: `${VAR}`, `$VAR`, `%VAR%`, `{{ var }}`, `<placeholder>`. */
     private val REFERENCE = Regex("""^\s*(\$\{[^}]*}|\$[A-Za-z_][A-Za-z0-9_]*|%[^%]+%|\{\{.*}}|<[^>]*>|env:[A-Za-z_]\w*)\s*$""")
 
-    /**
-     * Keys that name a credential. The LAST word has to be the credential noun --
-     * `api_token`, `client_secret`, `DB_PASSWORD` yes; `token_url`, `secretName`,
-     * `passwordPolicy` no -- because those are settings ABOUT a secret, not one.
-     */
-    private val CREDENTIAL_KEY = Regex(
-        """(^|[_.\-\s])(api[_-]?key|access[_-]?key|private[_-]?key|secret[_-]?key|signing[_-]?key|encryption[_-]?key|""" +
-            """secret|token|password|passwd|pwd|passphrase|credentials?|authorization|auth)$|[a-z0-9](ApiKey|AccessKey|""" +
-            """PrivateKey|SecretKey|Secret|Token|Password|Passphrase|Credentials?|Authorization)$""",
-        RegexOption.IGNORE_CASE,
-    )
-
     private val AUTH_SCHEME_PREFIX = Regex("""^(Bearer|Basic|Token)\s+""", RegexOption.IGNORE_CASE)
 
     /** `--api-key=VALUE` / `-p=VALUE` command-line arguments, as MCP configs pass them in `args`. */
@@ -109,8 +97,13 @@ object ConfigSecretScanner {
 
     fun isReference(value: String): Boolean = REFERENCE.matches(value)
 
-    /** True for a key that names a credential (last word is the credential noun). */
-    fun isCredentialKey(key: String): Boolean = CREDENTIAL_KEY.containsMatchIn(key.trim())
+    /**
+     * True for a key that names a credential. The LAST word has to be the credential noun --
+     * `api_token`, `client_secret`, `DB_PASSWORD` yes; `token_url`, `secretName`, `passwordPolicy`
+     * no, those are settings ABOUT a secret -- once environment and numbering suffixes are
+     * dropped (`API_KEY_1`, `DB_PASSWORD_PROD`, `apiKeyV2`), whatever the naming convention.
+     */
+    fun isCredentialKey(key: String): Boolean = KeyName.isCredentialKey(key.trim())
 
     /**
      * Scans one scalar. [heuristicEnabled] is the Pro switch: without it only an
@@ -162,10 +155,13 @@ object ConfigSecretScanner {
     fun scanDotEnv(text: String, heuristicEnabled: Boolean): List<LineFinding> {
         val findings = mutableListOf<LineFinding>()
         var offset = 0
-        for (rawLine in text.split("\n")) {
-            val lineStart = offset
+        for ((n, rawLine) in text.split("\n").withIndex()) {
+            // A byte-order mark left in front of line 1 is not part of the key: `^\s*` does not skip it, so
+            // `API_TOKEN=...` on the first line of a `.env` saved with a BOM was never checked.
+            val bom = if (n == 0 && rawLine.startsWith('\uFEFF')) 1 else 0
+            val lineStart = offset + bom
             offset += rawLine.length + 1
-            val line = rawLine.trimEnd('\r')
+            val line = rawLine.drop(bom).trimEnd('\r')
             if (line.isBlank() || line.trimStart().startsWith("#")) continue
             val match = ENV_LINE.matchEntire(line) ?: continue
             val (prefix, key, equals, rest) = match.destructured

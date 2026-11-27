@@ -9,13 +9,13 @@ class SecretDetectorTest {
 
     @Test
     fun detectsAwsAccessKey() {
-        val finding = SecretDetector.scanLiteral("AKIAIOSFODNN7EXAMPLE")
+        val finding = SecretDetector.scanLiteral("AKIA" + "Q7LM2XV9RT4KP8WZ")
         assertEquals("AWS_ACCESS_KEY", finding?.kind)
     }
 
     @Test
     fun detectsAwsAccessKeyEmbeddedInLongerString() {
-        val finding = SecretDetector.scanLiteral("export AWS_KEY=AKIAIOSFODNN7EXAMPLE")
+        val finding = SecretDetector.scanLiteral("export AWS_KEY=AKIA" + "Q7LM2XV9RT4KP8WZ")
         assertEquals("AWS_ACCESS_KEY", finding?.kind)
     }
 

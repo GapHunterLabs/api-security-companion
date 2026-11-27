@@ -4,6 +4,32 @@
 
 ## [Unreleased]
 
+## [2026.4.5]
+
+### Added
+
+- **Ten more exact credential formats:** Atlassian API tokens, Doppler, age secret keys, Linear, Postman, Grafana
+  service accounts, Square access tokens, PuTTY private keys, Azure Storage account keys in a connection string, and
+  bcrypt password hashes. The private key rule now covers every PEM and PGP header (`PGP PRIVATE KEY BLOCK`,
+  `PRIVATE KEY`, `EC`, `DSA`...). Like the other exact formats, they are free everywhere.
+
+### Fixed
+
+- **Configuration keys with an environment or numbering suffix are checked.** `API_KEY_1`, `DB_PASSWORD_PROD`,
+  `AUTH_TOKEN_V2` and `apiKeyProd` in `.env`, YAML, JSON and `.properties` files were skipped by the credential-name
+  check, because the credential noun had to be the last word. Suffixes such as `_1`, `_PROD`, `_DEV`, `_STAGING`,
+  `_PRIMARY` and `V2` are now dropped first, and every naming convention is split into words the same way.
+- **Fewer false positives:** AWS's documentation example key (ending in `EXAMPLE`) and tokens redacted by hand
+  (`ghp_XXXX...`, `sk-proj-****...`) are no longer reported; a real token later on the same line still is.
+  `REPLACE_ME` joins the placeholders.
+
+### Changed
+
+- Each exact format is tried only on text that contains its prefix, so the check costs less on long lines with no
+  token in them. What is detected does not change.
+- The `.env` scan ignores a byte-order mark in front of the first line. The IDE already removes it when it reads the
+  file, so this changes nothing in the editor; it protects other callers of the same scan.
+
 ## [2026.4.4]
 
 ### Added
@@ -223,7 +249,8 @@
 - Excessive Data Exposure / Mass Assignment checks are Java-only; Kotlin
   support needs its own annotation-resolution path.
 
-[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.4...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.5...HEAD
+[2026.4.5]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.4...2026.4.5
 [2026.4.4]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.3...2026.4.4
 [2026.4.3]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.2...2026.4.3
 [2026.4.2]: https://github.com/GapHunterLabs/api-security-companion/compare/2026.4.1...2026.4.2
